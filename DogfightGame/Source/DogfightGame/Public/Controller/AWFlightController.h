@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Controller.h"
+#include "GameFramework/PlayerController.h"
 #include "AWFlightController.generated.h"
 
 /**
@@ -16,11 +16,18 @@ Pitch
 Roll
  */
 UCLASS()
-class DOGFIGHTGAME_API AAWFlightController : public AController
+class DOGFIGHTGAME_API AAWFlightController : public APlayerController
 {
 	GENERATED_BODY()
 	
 public:
 
+	virtual void SetupInputComponent() override;
 
+	//Control Callbacks
+	void Pitch(float Value);
+	void Yaw(float Value);
+	void Roll(float Value);
+
+	void Thrust(float Value);
 };

@@ -15,4 +15,5 @@ class DOGFIGHTGAME_API AAWPlayerController : public AAWFlightController
 	GENERATED_BODY()
 	
 public:
+
 };
