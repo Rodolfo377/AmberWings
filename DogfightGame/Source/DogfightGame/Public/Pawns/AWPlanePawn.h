@@ -14,16 +14,27 @@ class DOGFIGHTGAME_API AAWPlanePawn : public APawn
 public:
 	// Sets default values for this pawn's properties
 	AAWPlanePawn();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
+public:	
+
+	/** First person camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* FirstPersonCameraComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMeshComponent* AirplaneMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UCapsuleComponent* CapsuleComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool DebugDraw;
 };
