@@ -27,6 +27,9 @@ public:
 
 	void BeginPlay() override;
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
 	virtual void SetupInputComponent() override;
 
 	//Control Callbacks
@@ -49,4 +52,24 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "AmberWings|FlightController")
 	float ThrustValue;
+
+	UPROPERTY(EditAnywhere, Category = "AmberWings|FlightController", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float LinearDragValue;
+
+	UPROPERTY(EditAnywhere, Category = "AmberWings|FlightController")
+	float SidewaysDragValue;
+
+	UPROPERTY(EditAnywhere, Category = "AmberWings|FlightController")
+	float VerticalDragValue;
+
+	UPROPERTY(EditAnywhere, Category = "AmberWings|FlightController")
+	float TopSpeed;
+
+	UPROPERTY(Transient)
+	float CurrentSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool DebugDraw;
+private:
+	FVector Acceleration;
 };

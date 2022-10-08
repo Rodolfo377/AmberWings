@@ -49,13 +49,13 @@ void AAWFlightController::Tick(float DeltaTime)
 	UE_LOG(LogTemp, Warning, TEXT("ResultForce: %f , %f, %f"), ResultForce.X, ResultForce.Y, ResultForce.Z);
 	FVector SidewaysMovement = PlanePawn->GetActorRightVector() * FVector::DotProduct(Movement, PlanePawn->GetActorRightVector());
 
-	ResultForce -= SidewaysMovement * SidewaysDragValue * PlanePawn->CapsuleComponent->GetMass();
+	ResultForce -= SidewaysMovement * SidewaysDragValue;
 
 	FVector VerticalMovement = PlanePawn->GetActorUpVector() * FVector::DotProduct(Movement, PlanePawn->GetActorUpVector());
-	
-	ResultForce -= VerticalMovement * VerticalDragValue * PlanePawn->CapsuleComponent->GetMass();
 
 	PlanePawn->CapsuleComponent->AddForce(ResultForce);
+	ResultForce -= VerticalMovement * VerticalDragValue;
+
 	if (DebugDraw)
 	{
 		//DrawDebugLine(GetWorld(), PlanePawn->GetActorLocation(), PlanePawn->GetActorLocation() + SidewaysMovement * 100, FColor::Blue, false, 0.5f, 0, 3.f);
