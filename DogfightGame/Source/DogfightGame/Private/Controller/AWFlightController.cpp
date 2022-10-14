@@ -73,6 +73,7 @@ void AAWFlightController::SetupInputComponent()
 	InputComponent->BindAxis("Pitch", this, &AAWFlightController::Pitch);
 	InputComponent->BindAxis("Yaw", this, &AAWFlightController::Yaw);
 	InputComponent->BindAxis("Roll", this, &AAWFlightController::Roll);
+	InputComponent->BindAxis("Turn", this, &AAWFlightController::Turn);
 }
 
 void AAWFlightController::Pitch(float Input)
@@ -106,6 +107,17 @@ void AAWFlightController::Roll(float Input)
 	float dt = GetWorld()->DeltaTimeSeconds;
 	PlanePawn->AddActorLocalRotation(FRotator(0, 0, RollValue * Input * dt));
 	UE_LOG(LogTemp, Warning, TEXT("Roll: %f "), Input);
+}
+
+void AAWFlightController::Turn(float Input)
+{
+	if (IsValid(PlanePawn) == false)
+	{
+		return;
+	}
+	float dt = GetWorld()->DeltaTimeSeconds;
+	PlanePawn->AddActorLocalRotation(FRotator(0, YawValue * Input * dt, 0));
+	PlanePawn->AddActorLocalRotation(FRotator(0, 0, RollValue * Input * dt));
 }
 
 void AAWFlightController::Thrust(float Input)

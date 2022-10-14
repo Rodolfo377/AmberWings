@@ -36,7 +36,7 @@ public:
 	void Pitch(float Value);
 	void Yaw(float Value);
 	void Roll(float Value);
-
+	void Turn(float Value);
 	void Thrust(float Value);
 
 protected:
