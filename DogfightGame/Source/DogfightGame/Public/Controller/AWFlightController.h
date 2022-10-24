@@ -70,6 +70,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool DebugDraw;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool DebugLog;
 private:
 	FVector Acceleration;
 };

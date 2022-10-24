@@ -28,7 +28,10 @@ void AAWFlightController::Tick(float DeltaTime)
 	FVector Movement = PlanePawn->GetVelocity();
 
 	CurrentSpeed = FVector::DotProduct(Movement, PlanePawn->GetActorForwardVector());
-	UE_LOG(LogTemp, Warning, TEXT("Movement Speed: %f"), CurrentSpeed);
+	if (DebugLog)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Movement Speed: %f"), CurrentSpeed);
+	}
 	//FVector SidewaysMovement = Movement * FVector::DotProduct(Movement, PlanePawn->GetActorRightVector());
 
 	
@@ -46,7 +49,10 @@ void AAWFlightController::Tick(float DeltaTime)
 		ResultForce -= LinearDragForce;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("ResultForce: %f , %f, %f"), ResultForce.X, ResultForce.Y, ResultForce.Z);
+	if (DebugLog)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ResultForce: %f , %f, %f"), ResultForce.X, ResultForce.Y, ResultForce.Z);
+	}
 	FVector SidewaysMovement = PlanePawn->GetActorRightVector() * FVector::DotProduct(Movement, PlanePawn->GetActorRightVector());
 
 	ResultForce -= SidewaysMovement * SidewaysDragValue * PlanePawn->CapsuleComponent->GetMass();
@@ -84,7 +90,10 @@ void AAWFlightController::Pitch(float Input)
 	}
 	float dt = GetWorld()->DeltaTimeSeconds;
 	PlanePawn->AddActorLocalRotation(FRotator(PitchValue * Input * dt, 0, 0));
-	UE_LOG(LogTemp, Warning, TEXT("Pitch: %f "), Input);
+	if (DebugLog)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Pitch: %f "), Input);
+	}
 }
 
 void AAWFlightController::Yaw(float Input)
@@ -95,7 +104,10 @@ void AAWFlightController::Yaw(float Input)
 	}
 	float dt = GetWorld()->DeltaTimeSeconds;
 	PlanePawn->AddActorLocalRotation(FRotator(0, YawValue * Input * dt, 0));
-	UE_LOG(LogTemp, Warning, TEXT("Yaw: %f "), Input);
+	if (DebugLog)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Yaw: %f "), Input);
+	}
 }
 
 void AAWFlightController::Roll(float Input)
@@ -106,7 +118,7 @@ void AAWFlightController::Roll(float Input)
 	}
 	float dt = GetWorld()->DeltaTimeSeconds;
 	PlanePawn->AddActorLocalRotation(FRotator(0, 0, RollValue * Input * dt));
-	UE_LOG(LogTemp, Warning, TEXT("Roll: %f "), Input);
+	if (DebugLog) { UE_LOG(LogTemp, Warning, TEXT("Roll: %f "), Input); }
 }
 
 void AAWFlightController::Turn(float Input)
@@ -131,7 +143,7 @@ void AAWFlightController::Thrust(float Input)
 	Acceleration = FVector(0);
 	if (Input > 0 && CurrentSpeed < TopSpeed)
 	{	
-		UE_LOG(LogTemp, Warning, TEXT("Thrust: %f "), Input);
+		if (DebugLog) { UE_LOG(LogTemp, Warning, TEXT("Thrust: %f "), Input); }
 		//PlanePawn->AirplaneMesh->AddForce(PlanePawn->GetActorForwardVector() * ThrustValue);
 		//PlanePawn->CapsuleComponent->AddForce(PlanePawn->GetActorForwardVector() * ThrustValue);
 		Acceleration = PlanePawn->GetActorForwardVector()* ThrustValue;
