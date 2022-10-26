@@ -35,38 +35,91 @@ void UAWEnvironmentSteeringComponent::BeginPlay()
 
 void UAWEnvironmentSteeringComponent::BuildEnvironmentPlane(FAWEnvironmentPlane& Plane)
 {
-	
+	//XY plane (horizontal to fighter jet)
 	if (Plane.Mode == 1)
 	{
 		float deltaAngleDegrees = 360.0f / Plane.TotalRadials;		
 		float deltaAngleRadians = deltaAngleDegrees * PI/180.0f;
 		for (int i = 0; i < Plane.TotalRadials; i++)
 		{
-			float cosDelta = FMath::Cos(deltaAngleRadians * i);
-			float sinDelta = FMath::Sin(deltaAngleRadians * i);
-
-			FVector RotatedVector = FVector(OwnerActor->GetActorForwardVector().X * cosDelta - OwnerActor->GetActorForwardVector().Y * sinDelta,
-				OwnerActor->GetActorForwardVector().X * sinDelta + OwnerActor->GetActorForwardVector().Y * cosDelta, 0);
-			Plane.InterestPlane.Add(i, RotatedVector);
+			FQuat q = FQuat(OwnerActor->GetActorUpVector(), deltaAngleRadians * i);
+			FVector QuaternionRotatedVector = q.RotateVector(OwnerActor->GetActorForwardVector());
+			Plane.InterestPlane.Add(i, QuaternionRotatedVector);
 		}
 		
-			for (TPair<int32, FVector>& RadialDirection : Plane.InterestPlane)
+		for (TPair<int32, FVector>& RadialDirection : Plane.InterestPlane)
+		{
+			if (bDebugDrawEnabled)
 			{
-				if (bDebugDrawEnabled)
-				{
-					DrawDebugSphere(GetWorld(), OwnerActor->GetActorLocation() + RadialDirection.Value * 200.0f, 30, 6, FColor::Red, false, -1, 0, 5);
-				}
-				/*DrawDebugLine(GetWorld(),
-					OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f, FColor::Green, false, 1.0f, 0, 5);*/
-				//UE_LOG(LogTemp, Warning, TEXT(" Radial %d: (%f, %f, %f) "), RadialDirection.Key, RadialDirection.Value.X, RadialDirection.Value.Y, 0);
-				if (bDebugLogEnabled)
-				{
-					UE_LOG(LogTemp, Warning, TEXT(" Radial %d: (%f, %f, %f) "), RadialDirection.Key,
-						(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).X,
-						(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).Y,
-						OwnerActor->GetActorLocation().Z);
-				}
-			} 
+				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + RadialDirection.Value * 200.0f, FColor::Green, false, -1, 0, 5);
+			}
+
+			if (bDebugLogEnabled)
+			{
+				UE_LOG(LogTemp, Warning, TEXT(" Radial %d: (%f, %f, %f) "), RadialDirection.Key,
+					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).X,
+					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).Y,
+					OwnerActor->GetActorLocation().Z);
+			}
+		} 
+	}
+
+	//YZ plane - goes along the fighter jet
+	if (Plane.Mode == 2)
+	{
+		float deltaAngleDegrees = 360.0f / Plane.TotalRadials;
+		float deltaAngleRadians = deltaAngleDegrees * PI / 180.0f;
+		for (int i = 0; i < Plane.TotalRadials; i++)
+		{
+			FQuat q = FQuat(OwnerActor->GetActorRightVector(), deltaAngleRadians * i);
+			FVector QuaternionRotatedVector = q.RotateVector(OwnerActor->GetActorForwardVector());
+			Plane.InterestPlane.Add(i, QuaternionRotatedVector);
+		}
+
+		for (TPair<int32, FVector>& RadialDirection : Plane.InterestPlane)
+		{
+			if (bDebugDrawEnabled)
+			{
+				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + RadialDirection.Value * 200.0f, FColor::Blue, false, -1, 0, 5);
+			}
+
+			if (bDebugLogEnabled)
+			{
+				UE_LOG(LogTemp, Warning, TEXT(" Radial %d: (%f, %f, %f) "), RadialDirection.Key,
+					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).X,
+					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).Y,
+					OwnerActor->GetActorLocation().Z);
+			}
+		}
+	}
+
+	//XZ plane - goes across the fighter jet
+	if (Plane.Mode == 3)
+	{
+		float deltaAngleDegrees = 360.0f / Plane.TotalRadials;
+		float deltaAngleRadians = deltaAngleDegrees * PI / 180.0f;
+		for (int i = 0; i < Plane.TotalRadials; i++)
+		{
+			FQuat q = FQuat(OwnerActor->GetActorForwardVector(), deltaAngleRadians * i);
+			FVector QuaternionRotatedVector = q.RotateVector(OwnerActor->GetActorUpVector());
+			Plane.InterestPlane.Add(i, QuaternionRotatedVector);
+		}
+
+		for (TPair<int32, FVector>& RadialDirection : Plane.InterestPlane)
+		{
+			if (bDebugDrawEnabled)
+			{
+				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + RadialDirection.Value * 200.0f, FColor::Red, false, -1, 0, 5);
+			}
+
+			if (bDebugLogEnabled)
+			{
+				UE_LOG(LogTemp, Warning, TEXT(" Radial %d: (%f, %f, %f) "), RadialDirection.Key,
+					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).X,
+					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).Y,
+					OwnerActor->GetActorLocation().Z);
+			}
+		}
 	}
 }
 
@@ -90,6 +143,12 @@ void UAWEnvironmentSteeringComponent::TickComponent(float DeltaTime, ELevelTick 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	BuildEnvironmentPlane(XYEnvironmentPlane);
+
+	YZEnvironmentPlane.Mode = 2;
+	BuildEnvironmentPlane(YZEnvironmentPlane);
+
+	XZEnvironmentPlane.Mode = 3;
+	BuildEnvironmentPlane(XZEnvironmentPlane);
 	// ...
 }
 
