@@ -71,6 +71,24 @@ void UAWCheckpointComponent::SortCheckpointArray()
 	}
 }
 
+bool UAWCheckpointComponent::IsCheckpointArrayValid()
+{
+	if (CheckpointArray.Num() == 0)
+	{
+		return false;
+	}
+	return true;
+}
+
+FVector UAWCheckpointComponent::ReturnNextCheckpointsLocation()
+{
+	if (CheckpointArray.Num() == 0)
+	{
+		return FVector(0);
+	}
+	return CheckpointArray[0]->GetActorLocation();
+}
+
 
 // Called every frame
 void UAWCheckpointComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

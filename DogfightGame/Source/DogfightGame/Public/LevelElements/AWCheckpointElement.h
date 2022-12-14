@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayTagContainer.h"
 #include "AWCheckpointElement.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FCheckpointReached, FHitResult)
@@ -41,4 +42,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 CheckpointUniqueID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTagContainer InterestTags;
 };

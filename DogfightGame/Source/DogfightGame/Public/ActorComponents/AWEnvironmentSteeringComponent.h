@@ -58,9 +58,16 @@ protected:
 	//Calculate the map corresponding to the GameplayTagContainer (Interest or Danger tag group).
 	UFUNCTION()
 	void ProcessEnvironmentPlaneMap(FAWEnvironmentPlane& EnvironmentPlane, const FGameplayTagContainer& Tags);
+
+	UFUNCTION()
+	void ProcessEnvironmentPlaneInterestMap(FAWEnvironmentPlane& EnvironmentPlane);
+
+	UFUNCTION()
+	void ProcessEnvironmentPlaneDangerMap(FAWEnvironmentPlane& EnvironmentPlane);
+
 	//Determine the result for each map plane. 
 	UFUNCTION()
-	void GenerateEnvironmentPlaneMapResult(FAWEnvironmentPlane& EnvironmentPlane);
+	FVector GenerateEnvironmentPlaneMapResult(FAWEnvironmentPlane& EnvironmentPlane);
 	//Calculate Result vector from all the environment plane calculations.
 	UFUNCTION()
 	FVector CalculateEnviromentSteeringVector();
@@ -72,16 +79,29 @@ public:
 	UPROPERTY()
 	FAWEnvironmentPlane XZEnvironmentPlane;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Interest")
 	FGameplayTagContainer InterestElements;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Danger")
 	FGameplayTagContainer DangerElements;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environemnt Steering|Movement")
+	float ESTurningRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Interest")
+	float InterestThreshold;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Danger")
+	float DangerThreshold;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Debug")
 	bool bDebugLogEnabled;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Debug")
 	bool bDebugDrawEnabled;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Danger", meta = (ClampMin = "0.0"))
+	float DangerRaycastLength;
 
 protected:
 	UPROPERTY()

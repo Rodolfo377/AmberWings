@@ -2,8 +2,10 @@
 
 
 #include "ActorComponents/AWEnvironmentSteeringComponent.h"
+#include "GameFramework/Actor.h"
 #include "DrawDebugHelpers.h"
 #include "Math/UnrealMathUtility.h"
+#include "ActorComponents/AWCheckpointComponent.h"
 #include "Controller/AWFlightController.h"
 
 
@@ -44,23 +46,30 @@ void UAWEnvironmentSteeringComponent::BuildEnvironmentPlane(FAWEnvironmentPlane&
 		{
 			FQuat q = FQuat(OwnerActor->GetActorUpVector(), deltaAngleRadians * i);
 			FVector QuaternionRotatedVector = q.RotateVector(OwnerActor->GetActorForwardVector());
+			FVector RadialPosition = OwnerActor->GetActorLocation() + QuaternionRotatedVector * 200.f;
 			Plane.InterestPlane.Add(i, QuaternionRotatedVector);
+			Plane.DangerPlane.Add(i, QuaternionRotatedVector);
+			Plane.SumPlane.Add(i, QuaternionRotatedVector);
+
+			//DrawDebugSphere(GetWorld(), RadialPosition, 20, 12, FColor::Blue, false, 1.0f, 0, 2.0f);
+			//DrawDebugSphere(GetWorld(), OwnerActor, 20, 12, FColor::Red, false, 1.0f, 0, 2.0f);
 		}
 		
-		for (TPair<int32, FVector>& RadialDirection : Plane.InterestPlane)
+		for (TPair<int32, FVector>& RadialDirection : Plane.SumPlane)
 		{
-			if (bDebugDrawEnabled)
+			/*if (bDebugDrawEnabled)
 			{
-				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + RadialDirection.Value * 200.0f, FColor::Green, false, -1, 0, 5);
-			}
+				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + 200.0f*RadialDirection.Value,
+					FColor::Blue, false, -1, 0, 5);
+			}*/
 
-			if (bDebugLogEnabled)
+			/*if (bDebugLogEnabled)
 			{
 				UE_LOG(LogTemp, Warning, TEXT(" Radial %d: (%f, %f, %f) "), RadialDirection.Key,
-					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).X,
-					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).Y,
+					(RadialDirection.Value).X,
+					(RadialDirection.Value).Y,
 					OwnerActor->GetActorLocation().Z);
-			}
+			}*/
 		} 
 	}
 
@@ -73,23 +82,27 @@ void UAWEnvironmentSteeringComponent::BuildEnvironmentPlane(FAWEnvironmentPlane&
 		{
 			FQuat q = FQuat(OwnerActor->GetActorRightVector(), deltaAngleRadians * i);
 			FVector QuaternionRotatedVector = q.RotateVector(OwnerActor->GetActorForwardVector());
+			FVector RadialPosition = OwnerActor->GetActorLocation() + QuaternionRotatedVector * 200.0f;
 			Plane.InterestPlane.Add(i, QuaternionRotatedVector);
+			Plane.DangerPlane.Add(i, QuaternionRotatedVector);
+			Plane.SumPlane.Add(i, QuaternionRotatedVector);
 		}
 
-		for (TPair<int32, FVector>& RadialDirection : Plane.InterestPlane)
+		for (TPair<int32, FVector>& RadialDirection : Plane.SumPlane)
 		{
-			if (bDebugDrawEnabled)
+			/*if (bDebugDrawEnabled)
 			{
-				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + RadialDirection.Value * 200.0f, FColor::Blue, false, -1, 0, 5);
-			}
+				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + 200.0f * RadialDirection.Value,
+					FColor::Blue, false, -1, 0, 5);
+			}*/
 
-			if (bDebugLogEnabled)
+			/*if (bDebugLogEnabled)
 			{
 				UE_LOG(LogTemp, Warning, TEXT(" Radial %d: (%f, %f, %f) "), RadialDirection.Key,
 					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).X,
 					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).Y,
 					OwnerActor->GetActorLocation().Z);
-			}
+			}*/
 		}
 	}
 
@@ -103,22 +116,25 @@ void UAWEnvironmentSteeringComponent::BuildEnvironmentPlane(FAWEnvironmentPlane&
 			FQuat q = FQuat(OwnerActor->GetActorForwardVector(), deltaAngleRadians * i);
 			FVector QuaternionRotatedVector = q.RotateVector(OwnerActor->GetActorUpVector());
 			Plane.InterestPlane.Add(i, QuaternionRotatedVector);
+			Plane.DangerPlane.Add(i, QuaternionRotatedVector);
+			Plane.SumPlane.Add(i, QuaternionRotatedVector);
 		}
 
-		for (TPair<int32, FVector>& RadialDirection : Plane.InterestPlane)
+		for (TPair<int32, FVector>& RadialDirection : Plane.SumPlane)
 		{
-			if (bDebugDrawEnabled)
+			/*if (bDebugDrawEnabled)
 			{
-				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + RadialDirection.Value * 200.0f, FColor::Red, false, -1, 0, 5);
-			}
+				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + 200.0f * RadialDirection.Value,
+					FColor::Blue, false, -1, 0, 5);
+			}*/
 
-			if (bDebugLogEnabled)
+			/*if (bDebugLogEnabled)
 			{
 				UE_LOG(LogTemp, Warning, TEXT(" Radial %d: (%f, %f, %f) "), RadialDirection.Key,
 					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).X,
 					(OwnerActor->GetActorLocation() + RadialDirection.Value * 5.0f).Y,
 					OwnerActor->GetActorLocation().Z);
-			}
+			}*/
 		}
 	}
 }
@@ -126,10 +142,110 @@ void UAWEnvironmentSteeringComponent::BuildEnvironmentPlane(FAWEnvironmentPlane&
 
 void UAWEnvironmentSteeringComponent::ProcessEnvironmentPlaneMap(FAWEnvironmentPlane& EnvironmentPlane, const FGameplayTagContainer& Tags)
 {
+
 }
 
-void UAWEnvironmentSteeringComponent::GenerateEnvironmentPlaneMapResult(FAWEnvironmentPlane& EnvironmentPlane)
+void UAWEnvironmentSteeringComponent::ProcessEnvironmentPlaneInterestMap(FAWEnvironmentPlane& EnvironmentPlane)
 {
+	UAWCheckpointComponent* CheckpointComponent = Cast<UAWCheckpointComponent> (OwnerActor->GetComponentByClass(UAWCheckpointComponent::StaticClass()));
+	FVector NextCheckpoint = CheckpointComponent->ReturnNextCheckpointsLocation();
+
+	
+
+	for (TPair<int32, FVector>& RadialDirection : EnvironmentPlane.InterestPlane)
+	{
+		FVector Dist = NextCheckpoint - OwnerActor->GetActorLocation();
+		float DotProduct = FVector::DotProduct(Dist.GetSafeNormal(), RadialDirection.Value.GetSafeNormal());
+		FColor DebugLineColor = FColor::Green;
+		if (DotProduct > 0)
+		{
+			//DebugLineColor = FColor::Green;
+			RadialDirection.Value +=  DotProduct * RadialDirection.Value;
+			DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + RadialDirection.Value,
+				FColor::Yellow, false, -1, 0, 5);
+		}
+		if (bDebugDrawEnabled)
+		{
+			DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(),
+				OwnerActor->GetActorLocation() + 200.0f*RadialDirection.Value,
+				DebugLineColor, false, -1, 0, 5);
+		}
+	}
+}
+
+void UAWEnvironmentSteeringComponent::ProcessEnvironmentPlaneDangerMap(FAWEnvironmentPlane& EnvironmentPlane)
+{
+	for (TPair<int32, FVector>& RadialDirection : EnvironmentPlane.DangerPlane)
+	{
+		FHitResult OutHit;
+		FVector Start = OwnerActor->GetActorLocation();
+		FVector End = OwnerActor->GetActorLocation() + (DangerRaycastLength * RadialDirection.Value);
+		FCollisionQueryParams CollisionParams;
+
+		CollisionParams.AddIgnoredActor(OwnerActor);
+
+		//DrawDebugLine(OwnerActor->GetWorld(), Start, End, FColor::Red, false, 0.5f, 0, 2.0f);
+		OwnerActor->GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECollisionChannel::ECC_WorldStatic, CollisionParams);
+
+		if (OutHit.bBlockingHit)
+		{
+			FVector Dist = OutHit.ImpactPoint - OwnerActor->GetActorLocation();
+			float DotProduct = FVector::DotProduct(Dist.GetSafeNormal(), RadialDirection.Value.GetSafeNormal());
+			
+			if (DotProduct > 0)
+			{
+				RadialDirection.Value += DotProduct * RadialDirection.Value;
+				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + 200.0f * RadialDirection.Value,
+					FColor::Red, false, -1, 0, 5);
+			}		
+		}
+	}
+}
+
+FVector UAWEnvironmentSteeringComponent::GenerateEnvironmentPlaneMapResult(FAWEnvironmentPlane& EnvironmentPlane)
+{
+	FVector Result = FVector(0);
+
+	for (TPair<int32, FVector>& RadialDirection : EnvironmentPlane.SumPlane)
+	{
+		int index = RadialDirection.Key;
+
+		/*if (EnvironmentPlane.DangerPlane[index].Size() > DangerThreshold ||
+			EnvironmentPlane.InterestPlane[index].Size() < InterestThreshold)
+		{
+			RadialDirection.Value *= 0;
+		}*/
+		//...
+
+
+		if (EnvironmentPlane.InterestPlane[index].Size() - EnvironmentPlane.DangerPlane[index].Size() < 0)
+		{
+			EnvironmentPlane.SumPlane[index] = FVector(0);
+			continue;
+		}		
+
+		EnvironmentPlane.SumPlane[index] = EnvironmentPlane.InterestPlane[index] - EnvironmentPlane.DangerPlane[index];
+
+		if (EnvironmentPlane.SumPlane[index].SizeSquared() > Result.SizeSquared())
+		{
+			Result = EnvironmentPlane.SumPlane[index];
+		}
+
+		if (bDebugDrawEnabled)
+		{
+			DrawDebugLine(GetWorld(),
+				OwnerActor->GetActorLocation(),
+				OwnerActor->GetActorLocation() + 200.0f * EnvironmentPlane.SumPlane[index],
+				FColor::Blue, false, 0.1f, 0, 5);
+		}
+	}
+	//...
+	/*if (bDebugDrawEnabled)
+	{
+		DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), Result, FColor::Green, false, -1, 0, 5);
+	}*/
+
+	return Result;
 }
 
 FVector UAWEnvironmentSteeringComponent::CalculateEnviromentSteeringVector()
@@ -143,12 +259,67 @@ void UAWEnvironmentSteeringComponent::TickComponent(float DeltaTime, ELevelTick 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	BuildEnvironmentPlane(XYEnvironmentPlane);
+	ProcessEnvironmentPlaneInterestMap(XYEnvironmentPlane);
+	ProcessEnvironmentPlaneDangerMap(XYEnvironmentPlane);
+
+	FVector XYResult = GenerateEnvironmentPlaneMapResult(XYEnvironmentPlane);
+
 
 	YZEnvironmentPlane.Mode = 2;
 	BuildEnvironmentPlane(YZEnvironmentPlane);
+	ProcessEnvironmentPlaneInterestMap(YZEnvironmentPlane);
+	ProcessEnvironmentPlaneDangerMap(YZEnvironmentPlane);
+	FVector YZResult = GenerateEnvironmentPlaneMapResult(YZEnvironmentPlane);
 
 	XZEnvironmentPlane.Mode = 3;
 	BuildEnvironmentPlane(XZEnvironmentPlane);
+	ProcessEnvironmentPlaneInterestMap(XZEnvironmentPlane);
+	ProcessEnvironmentPlaneDangerMap(XZEnvironmentPlane);
+
+	FVector XZResult = GenerateEnvironmentPlaneMapResult(XZEnvironmentPlane);
+
+	FVector SumEnvironmentSteering = XYResult + YZResult + XZResult;
+
+	/*OwnerActor->SetActorRotation(FMath::RInterpTo(OwnerActor->GetActorRotation(),
+		SumEnvironmentSteering.Rotation(),
+		DeltaTime,
+		ESTurningRate));*/
+
+	if (bDebugDrawEnabled)
+	{
+		DrawDebugLine(GetWorld(), 
+			OwnerActor->GetActorLocation(),
+			(OwnerActor->GetActorLocation() + 200* XYResult),
+			FColor::Purple,
+			false,
+			-1,
+			0,
+			25);
+	}
+
+	if (bDebugDrawEnabled)
+	{
+		DrawDebugLine(GetWorld(),
+			OwnerActor->GetActorLocation(),
+			(OwnerActor->GetActorLocation() + 200 * YZResult),
+			FColor::Purple,
+			false,
+			-1,
+			0,
+			25);
+	}
+
+	if (bDebugDrawEnabled)
+	{
+		DrawDebugLine(GetWorld(),
+			OwnerActor->GetActorLocation(),
+			(OwnerActor->GetActorLocation() + 200 * XZResult),
+			FColor::Purple,
+			false,
+			-1,
+			0,
+			25);
+	}
 	// ...
 }
 
