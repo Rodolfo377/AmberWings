@@ -4,6 +4,7 @@
 #include "Pawns/AWPlanePawn.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "ActorComponents/AWEnvironmentSteeringComponent.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -24,6 +25,7 @@ AAWPlanePawn::AAWPlanePawn():
 	FirstPersonCameraComponent->SetRelativeLocation(FVector(-39.56f, 1.75f, 64.f)); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
+
 	//AirplaneMesh->SetupAttachment(Capsule);
 }
 
@@ -31,13 +33,18 @@ AAWPlanePawn::AAWPlanePawn():
 void AAWPlanePawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	EnvironmentSteeringComponent = Cast<UAWEnvironmentSteeringComponent>(GetComponentByClass(UAWEnvironmentSteeringComponent::StaticClass()));
+
+	EnvironmentSteeringComponent->Init();
 }
 
 // Called every frame
 void AAWPlanePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	EnvironmentSteeringComponent->Update(DeltaTime);
+
 	if (DebugDraw)
 	{
 		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + 200*GetActorForwardVector(), FColor::Emerald, false, 2, 0, 5);
@@ -45,9 +52,4 @@ void AAWPlanePawn::Tick(float DeltaTime)
 }
 
 // Called to bind functionality to input
-void AAWPlanePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
 

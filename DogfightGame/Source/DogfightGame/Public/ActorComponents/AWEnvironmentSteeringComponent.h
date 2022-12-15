@@ -18,8 +18,8 @@ struct FAWEnvironmentPlane
 	UPROPERTY()
 	int32 Mode = 1;
 	//radial is each direction to be considered by the flying unit on a 360 degree basis. 
-	UPROPERTY()
-	int32 TotalRadials = 8;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering")
+	int TotalRadials = 16;
 
 	//Maps an index to its interest, represented by a vector in each radial direction.
 	UPROPERTY()
@@ -46,11 +46,15 @@ class DOGFIGHTGAME_API UAWEnvironmentSteeringComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UAWEnvironmentSteeringComponent();
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-protected:
+
 	// Called when the game starts 
-	virtual void BeginPlay() override;
+	void Init();
+
+	// Called every frame
+	void Update(float DeltaTime);
+	
+	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+protected:	
 
 	//Build the radial vectors around the owner pawn, in the defined Plane. 
 	UFUNCTION()
@@ -64,7 +68,7 @@ protected:
 
 	UFUNCTION()
 	void ProcessEnvironmentPlaneDangerMap(FAWEnvironmentPlane& EnvironmentPlane);
-
+		
 	//Determine the result for each map plane. 
 	UFUNCTION()
 	FVector GenerateEnvironmentPlaneMapResult(FAWEnvironmentPlane& EnvironmentPlane);
@@ -85,7 +89,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Danger")
 	FGameplayTagContainer DangerElements;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environemnt Steering|Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Movement")
 	float ESTurningRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Interest")
@@ -103,6 +107,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Danger", meta = (ClampMin = "0.0"))
 	float DangerRaycastLength;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Steering|Danger", meta = (ClampMin = "0.0"))
+	float DangerWeight;
 protected:
 	UPROPERTY()
 	class AAWFlightController* OwnerController;

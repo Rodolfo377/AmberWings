@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "Math/UnrealMathUtility.h"
 #include "ActorComponents/AWCheckpointComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Controller/AWFlightController.h"
 
 
@@ -22,10 +23,8 @@ UAWEnvironmentSteeringComponent::UAWEnvironmentSteeringComponent():
 
 
 // Called when the game starts
-void UAWEnvironmentSteeringComponent::BeginPlay()
+void UAWEnvironmentSteeringComponent::Init()
 {
-	Super::BeginPlay();
-	auto Owner = GetOwner();
 	/*OwnerController = Cast<AAWFlightController>(GetOwner());
 	check(OwnerController);*/
 
@@ -161,14 +160,13 @@ void UAWEnvironmentSteeringComponent::ProcessEnvironmentPlaneInterestMap(FAWEnvi
 		{
 			//DebugLineColor = FColor::Green;
 			RadialDirection.Value +=  DotProduct * RadialDirection.Value;
-			DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + RadialDirection.Value,
-				FColor::Yellow, false, -1, 0, 5);
+			
 		}
 		if (bDebugDrawEnabled)
 		{
-			DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(),
+			/*DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(),
 				OwnerActor->GetActorLocation() + 200.0f*RadialDirection.Value,
-				DebugLineColor, false, -1, 0, 5);
+				DebugLineColor, false, -1, 0, 5);*/
 		}
 	}
 }
@@ -182,10 +180,27 @@ void UAWEnvironmentSteeringComponent::ProcessEnvironmentPlaneDangerMap(FAWEnviro
 		FVector End = OwnerActor->GetActorLocation() + (DangerRaycastLength * RadialDirection.Value);
 		FCollisionQueryParams CollisionParams;
 
+		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_WorldStatic);
+		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypesArray;
+		ObjectTypesArray.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+
+		TArray<AActor*> IgnoredActors;
+		IgnoredActors.Add(OwnerActor);
+
 		CollisionParams.AddIgnoredActor(OwnerActor);
+		UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(),
+			Start,
+			End,
+			200.0f,
+			ObjectTypesArray,
+			false,
+			IgnoredActors,
+			EDrawDebugTrace::None,
+			OutHit,
+			true);
 
 		//DrawDebugLine(OwnerActor->GetWorld(), Start, End, FColor::Red, false, 0.5f, 0, 2.0f);
-		OwnerActor->GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECollisionChannel::ECC_WorldStatic, CollisionParams);
+		//OwnerActor->GetWorld()->Trace(OutHit, Start, End, ECollisionChannel::ECC_WorldStatic, CollisionParams);
 
 		if (OutHit.bBlockingHit)
 		{
@@ -194,7 +209,7 @@ void UAWEnvironmentSteeringComponent::ProcessEnvironmentPlaneDangerMap(FAWEnviro
 			
 			if (DotProduct > 0)
 			{
-				RadialDirection.Value += DotProduct * RadialDirection.Value;
+				RadialDirection.Value += DangerWeight * DotProduct * RadialDirection.Value;
 				DrawDebugLine(GetWorld(), OwnerActor->GetActorLocation(), OwnerActor->GetActorLocation() + 200.0f * RadialDirection.Value,
 					FColor::Red, false, -1, 0, 5);
 			}		
@@ -221,6 +236,15 @@ FVector UAWEnvironmentSteeringComponent::GenerateEnvironmentPlaneMapResult(FAWEn
 		if (EnvironmentPlane.InterestPlane[index].Size() - EnvironmentPlane.DangerPlane[index].Size() < 0)
 		{
 			EnvironmentPlane.SumPlane[index] = FVector(0);
+			DrawDebugLine(GetWorld(), 
+				OwnerActor->GetActorLocation(), 
+				OwnerActor->GetActorLocation() + EnvironmentPlane.DangerPlane[index],
+				FColor::Black, 
+				false, 
+				0.5f, 
+				0, 
+				15);
+
 			continue;
 		}		
 
@@ -254,16 +278,13 @@ FVector UAWEnvironmentSteeringComponent::CalculateEnviromentSteeringVector()
 }
 
 
-// Called every frame
-void UAWEnvironmentSteeringComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UAWEnvironmentSteeringComponent::Update(float DeltaTime)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	BuildEnvironmentPlane(XYEnvironmentPlane);
 	ProcessEnvironmentPlaneInterestMap(XYEnvironmentPlane);
 	ProcessEnvironmentPlaneDangerMap(XYEnvironmentPlane);
 
 	FVector XYResult = GenerateEnvironmentPlaneMapResult(XYEnvironmentPlane);
-
 
 	YZEnvironmentPlane.Mode = 2;
 	BuildEnvironmentPlane(YZEnvironmentPlane);
@@ -280,46 +301,21 @@ void UAWEnvironmentSteeringComponent::TickComponent(float DeltaTime, ELevelTick 
 
 	FVector SumEnvironmentSteering = XYResult + YZResult + XZResult;
 
-	/*OwnerActor->SetActorRotation(FMath::RInterpTo(OwnerActor->GetActorRotation(),
+	OwnerActor->SetActorRotation(FMath::RInterpTo(OwnerActor->GetActorRotation(),
 		SumEnvironmentSteering.Rotation(),
 		DeltaTime,
-		ESTurningRate));*/
-
-	if (bDebugDrawEnabled)
-	{
-		DrawDebugLine(GetWorld(), 
-			OwnerActor->GetActorLocation(),
-			(OwnerActor->GetActorLocation() + 200* XYResult),
-			FColor::Purple,
-			false,
-			-1,
-			0,
-			25);
-	}
+		ESTurningRate));
 
 	if (bDebugDrawEnabled)
 	{
 		DrawDebugLine(GetWorld(),
 			OwnerActor->GetActorLocation(),
-			(OwnerActor->GetActorLocation() + 200 * YZResult),
+			(OwnerActor->GetActorLocation() + 200 * SumEnvironmentSteering),
 			FColor::Purple,
 			false,
 			-1,
 			0,
 			25);
 	}
-
-	if (bDebugDrawEnabled)
-	{
-		DrawDebugLine(GetWorld(),
-			OwnerActor->GetActorLocation(),
-			(OwnerActor->GetActorLocation() + 200 * XZResult),
-			FColor::Purple,
-			false,
-			-1,
-			0,
-			25);
-	}
-	// ...
 }
 
